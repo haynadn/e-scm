@@ -207,6 +207,17 @@ initDB().then(() => {
     }
   });
 
+  app.put('/api/locations/:id', authenticateToken, async (req, res) => {
+    const locationId = req.params.id;
+    const { name } = req.body;
+    try {
+      await db.query(`UPDATE locations SET name = $1 WHERE id = $2`, [name, locationId]);
+      res.json({ success: true, message: 'Location name updated' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.post('/api/profile/change-password', authenticateToken, async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     const userId = req.user.id;

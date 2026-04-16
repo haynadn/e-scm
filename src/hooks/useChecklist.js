@@ -134,6 +134,27 @@ export function useChecklist() {
     }
   };
 
+  const updateLocationName = async (locationId, newName) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/locations/${locationId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+      });
+      if (res.ok) {
+        await loadOnlineData();
+        return true;
+      }
+      return false;
+    } catch(err) {
+      console.error(err);
+      return false;
+    }
+  };
+
   const getStats = () => {
     let completedLocations = 0;
     let totalItemsChecked = 0;
@@ -186,6 +207,7 @@ export function useChecklist() {
     saveChecklist,
     getStats,
     importMasterData,
-    clearAllData
+    clearAllData,
+    updateLocationName
   };
 }

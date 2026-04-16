@@ -14,7 +14,7 @@ import './index.css';
 function App() {
   const { 
     isLoaded, session, loginSuccess, performLogout, 
-    locations, masterItems, checklists, saveChecklist, getStats, importMasterData, clearAllData 
+    locations, masterItems, checklists, saveChecklist, getStats, importMasterData, clearAllData, updateLocationName 
   } = useChecklist();
   
   // view: 'dashboard' | 'locations' | 'checklist' | 'master'
@@ -129,6 +129,7 @@ function App() {
             locations={locations} 
             onSelectLocation={(loc) => navigateTo('checklist', loc)}
             onBack={() => navigateTo('dashboard')}
+            onUpdateLocationName={updateLocationName}
           />
         )}
         
