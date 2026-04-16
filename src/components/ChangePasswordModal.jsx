@@ -65,64 +65,73 @@ const ChangePasswordModal = ({ isOpen, onClose, token }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '400px' }}>
-        <div className="modal-header">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Key size={24} /> Ubah Password
+    <div className="modal-overlay" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+      <div className="modal-content animate-fade-in" style={{ maxWidth: '400px', borderRadius: '12px', overflow: 'hidden', padding: 0, border: 'none' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', backgroundColor: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.25rem', color: 'var(--text)' }}>
+            <div style={{ display: 'flex', padding: '0.5rem', backgroundColor: '#EEF2FF', borderRadius: '8px', color: 'var(--primary)' }}>
+              <Key size={20} />
+            </div>
+            Ubah Password
           </h2>
-          <button className="btn-icon" onClick={onClose}>
-            <X size={20} />
+          <button className="btn-icon" onClick={onClose} style={{ padding: '0.5rem' }}>
+            <X size={20} color="var(--text-muted)" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', backgroundColor: 'white' }}>
           {error && (
-            <div className="message error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertCircle size={18} /> {error}
+            <div style={{ padding: '0.75rem 1rem', backgroundColor: '#FEE2E2', color: '#B91C1C', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <AlertCircle size={18} style={{ flexShrink: 0 }} /> {error}
             </div>
           )}
           
           {success && (
-            <div className="message success" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <CheckCircle size={18} /> {success}
+            <div style={{ padding: '0.75rem 1rem', backgroundColor: '#ECFDF5', color: '#047857', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <CheckCircle size={18} style={{ flexShrink: 0 }} /> {success}
             </div>
           )}
 
-          <div className="form-group">
-            <label>Password Lama</label>
-            <div className="input-with-icon">
-              <Lock size={16} className="input-icon" />
+          <div className="form-group" style={{ margin: 0 }}>
+            <label className="form-label" style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Password Lama</label>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} style={{ position: 'absolute', top: '0.8rem', left: '1rem', color: 'var(--text-muted)' }} />
               <input
                 type="password"
+                className="form-control"
+                style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
-                placeholder="Masukkan password lama"
+                placeholder="Masukkan password saat ini"
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Password Baru</label>
-            <div className="input-with-icon">
-              <Key size={16} className="input-icon" />
+          <div className="form-group" style={{ margin: 0 }}>
+            <label className="form-label" style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Password Baru</label>
+            <div style={{ position: 'relative' }}>
+              <Key size={18} style={{ position: 'absolute', top: '0.8rem', left: '1rem', color: 'var(--text-muted)' }} />
               <input
                 type="password"
+                className="form-control"
+                style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                placeholder="Masukkan password baru"
+                placeholder="Minimal 6 karakter"
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Konfirmasi Password Baru</label>
-            <div className="input-with-icon">
-              <Key size={16} className="input-icon" />
+          <div className="form-group" style={{ margin: 0 }}>
+            <label className="form-label" style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Konfirmasi Password</label>
+            <div style={{ position: 'relative' }}>
+              <CheckCircle size={18} style={{ position: 'absolute', top: '0.8rem', left: '1rem', color: 'var(--text-muted)' }} />
               <input
                 type="password"
+                className="form-control"
+                style={{ paddingLeft: '2.75rem', paddingRight: '1rem' }}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -131,11 +140,11 @@ const ChangePasswordModal = ({ isOpen, onClose, token }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ flex: 1 }}
+              className="btn btn-outline"
+              style={{ flex: 1, padding: '0.75rem' }}
               onClick={onClose}
               disabled={loading}
             >
@@ -144,10 +153,10 @@ const ChangePasswordModal = ({ isOpen, onClose, token }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ flex: 2 }}
+              style={{ flex: 2, padding: '0.75rem' }}
               disabled={loading}
             >
-              {loading ? 'Memproses...' : 'Simpan Perubahan'}
+              {loading ? 'Menyimpan...' : 'Simpan Password'}
             </button>
           </div>
         </form>
