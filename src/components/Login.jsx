@@ -42,8 +42,7 @@ export default function Login({ onLoginSuccess }) {
           <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: '#EEF2FF', borderRadius: '50%', color: 'var(--primary)', marginBottom: '1rem' }}>
             <Lock size={32} />
           </div>
-          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>e-SCM</h2>
-          <p className="text-muted">Sigma Cheklist Manager</p>
+          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.5rem', lineHeight: '1.2' }}>Sigma Online<br/>Equipment Checklist</h2>
         </div>
         
         {error && (

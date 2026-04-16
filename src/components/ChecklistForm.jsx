@@ -3,28 +3,31 @@ import { ArrowLeft, Save, Camera, Upload, Trash2 } from 'lucide-react';
 
 export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack }) {
   const [formData, setFormData] = useState({});
+  const [address, setAddress] = useState(location.address || '');
 
   useEffect(() => {
+    const initialData = {};
+    masterItems.forEach(item => {
+      initialData[item.id] = {
+        idItem: item.id,
+        jumlahAktual: '',
+        kondisi: 'Bagus',
+        dokumentasi: '', 
+        catatan: ''
+      };
+    });
+
     if (savedData && savedData.length > 0) {
-      const initialData = {};
       savedData.forEach(item => {
-        initialData[item.idItem] = item;
+        // Only merge if item exists in masterItems to prevent stale data
+        if (initialData[item.idItem]) {
+          initialData[item.idItem] = item;
+        }
       });
-      setFormData(initialData);
-    } else {
-      const initialData = {};
-      masterItems.forEach(item => {
-        initialData[item.id] = {
-          idItem: item.id,
-          jumlahAktual: '',
-          kondisi: 'Bagus',
-          dokumentasi: '', 
-          catatan: ''
-        };
-      });
-      setFormData(initialData);
     }
-  }, [savedData, masterItems]);
+    setFormData(initialData);
+    setAddress(location.address || '');
+  }, [savedData, masterItems, location]);
 
   const handleInputChange = (idItem, field, value) => {
     setFormData(prev => ({
@@ -41,13 +44,9 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Base64 string that can be easily persisted in localForage
         const base64String = reader.result;
         handleInputChange(idItem, 'dokumentasi', base64String);
       };
-      
-      // Resize or directly read. For robust apps, compress first.
-      // We will just read it directly as data URL.
       reader.readAsDataURL(file);
     }
   };
@@ -55,7 +54,11 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
   const handleSubmit = (e) => {
     e.preventDefault();
     const dataToSave = Object.values(formData);
-    onSave(location.id, dataToSave);
+    
+    // Calculate if all items are filled (partial save logic)
+    const isCompleted = dataToSave.every(item => item.jumlahAktual !== '' && item.jumlahAktual !== null);
+    
+    onSave(location.id, dataToSave, isCompleted, address);
     onBack(); 
   };
 
@@ -86,6 +89,16 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             <Save size={18} /> Save Data
           </button>
         </div>
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+          <label className="form-label" style={{ fontWeight: 600 }}>Alamat / Deskripsi Tambahan :</label>
+          <textarea 
+            className="form-control" 
+            placeholder="Ketikkan perbaikan/tambahan alamat di sini..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            style={{ minHeight: '60px' }}
+          />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -110,7 +123,6 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                     min="0"
                     value={currentItemState.jumlahAktual || ''}
                     onChange={(e) => handleInputChange(item.id, 'jumlahAktual', e.target.value)}
-                    required
                   />
                 </div>
                 

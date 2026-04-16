@@ -78,7 +78,7 @@ function App() {
     <div className="app-container">
       <header className="header" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ flex: 1 }}>
-          <h1>e-SCM - Sigma Cheklist Manager</h1>
+          <h1>Sigma Online Equipment Checklist</h1>
           <p>Logged in as: <strong>{session.username}</strong> ({session.role})</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

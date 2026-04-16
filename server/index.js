@@ -149,13 +149,15 @@ initDB().then(() => {
   app.post('/api/locations/:id/checklist', authenticateToken, async (req, res) => {
     const locationId = req.params.id;
     const itemsData = req.body.items; 
+    const isCompleted = req.body.isCompleted || false;
+    const address = req.body.address || '';
     const client = await db.connect();
 
     try {
       await client.query("BEGIN");
       
-      // Update location status
-      await client.query(`UPDATE locations SET isCompleted = TRUE WHERE id = $1`, [locationId]);
+      // Update location status and address dynamically
+      await client.query(`UPDATE locations SET isCompleted = $1, address = $2 WHERE id = $3`, [isCompleted, address, locationId]);
       
       // Clear existing records for this location
       await client.query(`DELETE FROM checklists WHERE locationId = $1`, [locationId]);
@@ -175,13 +177,19 @@ initDB().then(() => {
         }
 
         const id = `${locationId}_${item.idItem}`;
+        
+        // Let it be NULL if empty to preserve accurate unchecked state
+        const parsedJumlahAktual = (item.jumlahAktual !== '' && item.jumlahAktual !== null && item.jumlahAktual !== undefined) 
+                                      ? parseInt(item.jumlahAktual) 
+                                      : null;
+
         await client.query(
           `INSERT INTO checklists (id, locationId, itemId, jumlahAktual, kondisi, dokumentasi, catatan) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             id, 
             locationId, 
             item.idItem, 
-            item.jumlahAktual ? parseInt(item.jumlahAktual) : 0, 
+            parsedJumlahAktual, 
             item.kondisi, 
             finalDokumentasi, 
             item.catatan

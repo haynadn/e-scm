@@ -109,7 +109,7 @@ export function useChecklist() {
     }
   };
 
-  const saveChecklist = async (locationId, itemsData) => {
+  const saveChecklist = async (locationId, itemsData, isCompleted, address) => {
     try {
       const res = await fetch(`${API_BASE_URL}/locations/${locationId}/checklist`, {
         method: 'POST',
@@ -117,8 +117,7 @@ export function useChecklist() {
           'Authorization': `Bearer ${session.token}`,
           'Content-Type': 'application/json'
         },
-        // itemsData might contain big base64 strings, standard express limit handled this.
-        body: JSON.stringify({ items: itemsData })
+        body: JSON.stringify({ items: itemsData, isCompleted, address })
       });
       
       if(res.ok) {
@@ -147,9 +146,13 @@ export function useChecklist() {
     safeLocations.forEach(loc => {
       if (loc.isCompleted) {
         completedLocations++;
-        const locChecklist = data.checklists[loc.id] || [];
-        
-        locChecklist.forEach(chk => {
+      }
+      
+      const locChecklist = data.checklists[loc.id] || [];
+      
+      locChecklist.forEach(chk => {
+        // Only count item if it has been actually filled
+        if (chk.jumlahAktual !== null && chk.jumlahAktual !== '' && chk.jumlahAktual !== undefined) {
           totalItemsChecked++;
           const master = safeMasterItems.find(m => m.id === chk.idItem);
           const actualQty = parseInt(chk.jumlahAktual);
@@ -158,8 +161,8 @@ export function useChecklist() {
           } else {
             nonMatchingItems++;
           }
-        });
-      }
+        }
+      });
     });
 
     return {
