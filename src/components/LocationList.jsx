@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { Map, ChevronRight, CheckCircle, Search, Edit2, Check, X } from 'lucide-react';
 
-export default function LocationList({ locations, onSelectLocation, onBack, onUpdateLocationName }) {
-  const [filter, setFilter] = useState('all'); // 'all', 'completed', 'pending'
+export default function LocationList({ locations, checklists = {}, masterItems = [], onSelectLocation, onBack, onUpdateLocationName }) {
+  const [filter, setFilter] = useState('all'); // 'all', 'completed', 'partial', 'kosong'
   const [searchQuery, setSearchQuery] = useState('');
   
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
 
-  const filteredLocations = locations.filter(loc => {
+  const enrichedLocations = locations.map(loc => {
+    const locChecklist = checklists[loc.id] || [];
+    const filledCount = locChecklist.filter(chk => chk.jumlahAktual !== null && chk.jumlahAktual !== '' && chk.jumlahAktual !== undefined).length;
+    const isPartial = filledCount > 0 && filledCount < masterItems.length;
+    const isZero = filledCount === 0;
+    
+    return { ...loc, filledCount, isPartial, isZero, totalItems: masterItems.length };
+  });
+
+  const filteredLocations = enrichedLocations.filter(loc => {
     const matchesFilter = filter === 'all' || 
                           (filter === 'completed' && loc.isCompleted) || 
-                          (filter === 'pending' && !loc.isCompleted);
+                          (filter === 'partial' && loc.isPartial && !loc.isCompleted) ||
+                          (filter === 'kosong' && loc.isZero && !loc.isCompleted);
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           loc.id.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
@@ -63,11 +73,18 @@ export default function LocationList({ locations, onSelectLocation, onBack, onUp
             Selesai (Completed)
           </button>
           <button 
-            className={`btn ${filter === 'pending' ? 'btn-primary' : 'btn-outline'}`}
+            className={`btn ${filter === 'partial' ? 'btn-primary' : 'btn-outline'}`}
             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderRadius: '20px' }}
-            onClick={() => setFilter('pending')}
+            onClick={() => setFilter('partial')}
           >
-            Belum Selesai (Pending)
+            Dicicil (Partial)
+          </button>
+          <button 
+            className={`btn ${filter === 'kosong' ? 'btn-primary' : 'btn-outline'}`}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderRadius: '20px' }}
+            onClick={() => setFilter('kosong')}
+          >
+            Kosong (0%)
           </button>
         </div>
         <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
@@ -101,6 +118,13 @@ export default function LocationList({ locations, onSelectLocation, onBack, onUp
               </span>
               <Map size={20} className="text-muted" />
             </div>
+
+            <div style={{ marginBottom: '1rem', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-block', backgroundColor: loc.isCompleted ? '#D1FAE5' : loc.isPartial ? '#FEF3C7' : '#F3F4F6', color: loc.isCompleted ? '#065F46' : loc.isPartial ? '#92400E' : '#4B5563' }}>
+              {loc.isCompleted ? `Tuntas (${loc.totalItems} / ${loc.totalItems})` 
+                : loc.isPartial ? `⏳ Progres Cicilan: ${loc.filledCount} dari ${loc.totalItems} diisi` 
+                : `Kosong (0 / ${loc.totalItems} diisi)`}
+            </div>
+
             <div style={{ marginBottom: '0.25rem', position: 'relative' }}>
               {editingId === loc.id ? (
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>

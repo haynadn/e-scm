@@ -127,6 +127,8 @@ function App() {
         {currentView === 'locations' && (
           <LocationList 
             locations={locations} 
+            checklists={checklists}
+            masterItems={masterItems}
             onSelectLocation={(loc) => navigateTo('checklist', loc)}
             onBack={() => navigateTo('dashboard')}
             onUpdateLocationName={updateLocationName}
