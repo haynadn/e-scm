@@ -238,6 +238,16 @@ initDB().then(() => {
     }
   });
 
+  // Health check endpoint for CI/CD
+  app.get('/api/health', async (req, res) => {
+    try {
+      await db.query('SELECT 1');
+      res.json({ status: 'ok', db: 'connected', time: new Date().toISOString() });
+    } catch (err) {
+      res.status(500).json({ status: 'error', db: 'disconnected', error: err.message });
+    }
+  });
+
   // Fallback for React Single Page Application (SPA) routing
   app.get(/.*/, (req, res) => {
     if (fs.existsSync(distDir)) {
