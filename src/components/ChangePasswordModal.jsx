@@ -65,8 +65,8 @@ const ChangePasswordModal = ({ isOpen, onClose, token }) => {
   };
 
   return (
-    <div className="modal-overlay" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-      <div className="modal-content animate-fade-in" style={{ maxWidth: '400px', borderRadius: '12px', overflow: 'hidden', padding: 0, border: 'none' }}>
+    <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+      <div className="modal-content animate-fade-in" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', padding: 0, border: 'none', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', backgroundColor: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.25rem', color: 'var(--text)' }}>
             <div style={{ display: 'flex', padding: '0.5rem', backgroundColor: '#EEF2FF', borderRadius: '8px', color: 'var(--primary)' }}>
