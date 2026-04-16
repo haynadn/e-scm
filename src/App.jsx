@@ -107,7 +107,10 @@ function App() {
           <Dashboard 
             stats={getStats()} 
             onNavigate={navigateTo} 
-            onExport={handleExportReport} 
+            onExport={handleExportReport}
+            locations={locations}
+            checklists={checklists}
+            masterItems={masterItems}
           />
         )}
 
