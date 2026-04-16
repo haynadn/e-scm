@@ -11,7 +11,7 @@ lerna-debug.log*
 node_modules
 
 # Build output
-dist
+# dist is included for VPS deployment
 dist-ssr
 dist_electron/
 
