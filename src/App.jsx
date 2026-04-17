@@ -23,13 +23,18 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!session.token) {
     return <Login onLoginSuccess={loginSuccess} />;
   }
 
   if (!isLoaded) {
-    return <div style={{ padding: '3rem', textAlign: 'center' }}><h2>Connecting to Cloud Database...</h2></div>;
+    return <div className="loading-container"><h2>Connecting to Cloud Database...</h2></div>;
+  }
+
+  if (isExporting) {
+    return <div className="loading-container"><h2>Generating Excel Report...</h2><p>This may take a few seconds if you have many photos.</p></div>;
   }
 
   const navigateTo = (view, loc = null) => {
@@ -64,7 +69,7 @@ function App() {
   const handleExportReport = async () => {
     try {
       // Preparations
-      setIsLoaded(false); // Show loading indicator
+      setIsExporting(true); // Show loading indicator
       
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Checklist Laporan');
@@ -134,7 +139,7 @@ function App() {
       }
 
       if (!dataFound) {
-        setIsLoaded(true);
+        setIsExporting(false);
         alert("Belum ada data checklist yang diisi. Isi minimal satu lokasi untuk diekspor!");
         return;
       }
@@ -147,7 +152,7 @@ function App() {
       console.error('Export failed:', err);
       alert('Gagal mengekspor data: ' + err.message);
     } finally {
-      setIsLoaded(true);
+      setIsExporting(false);
     }
   };
 

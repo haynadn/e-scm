@@ -239,3 +239,19 @@ textarea.form-control {
 .mb-4 { margin-bottom: 1rem; }
 .ml-2 { margin-left: 0.5rem; }
 .w-full { width: 100%; }
+/* Loading Overlay */
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background);
+  color: var(--primary);
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading-container h2 {
+  margin-bottom: 1rem;
+}
