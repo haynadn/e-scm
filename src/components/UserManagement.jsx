@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users, ArrowLeft, Shield, Eye, Trash2 } from 'lucide-react';
+import { UserPlus, Users, ArrowLeft, Shield, Eye, Trash2, Database } from 'lucide-react';
 
 export default function UserManagement({ onBack, token, role }) {
   const [users, setUsers] = useState([]);
