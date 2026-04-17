@@ -48,10 +48,17 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
   return (
     <div className="animate-fade-in">
       <div className="flex-between mb-4">
-        <h2>Dashboard Analytics</h2>
-        <button className="btn btn-outline" style={{ borderColor: '#10B981', color: '#10B981' }} onClick={onExport}>
-          <Download size={18} className="mr-2" /> Export to Excel
-        </button>
+        <h2>Analytics Overview</h2>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {role !== 'viewer' && (
+            <button className="btn btn-primary" onClick={() => onNavigate('locations')}>
+              <MapPin size={18} className="mr-2" /> Start Filling
+            </button>
+          )}
+          <button className="btn btn-outline" onClick={onExport}>
+            <Download size={18} className="mr-2" /> Export to Excel
+          </button>
+        </div>
       </div>
 
       <div className="grid-stats">

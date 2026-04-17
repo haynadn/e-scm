@@ -83,11 +83,6 @@ function App() {
           <p>Logged in as: <strong>{session.username}</strong> ({session.role})</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
-          {session.role !== 'viewer' && (
-             <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.6rem 1.25rem', fontWeight: 700, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} onClick={() => navigateTo('locations')}>
-               Start Filling <MapPin className="ml-1" size={18} />
-             </button>
-          )}
           {session.role === 'admin' && (
             <>
               <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('master')}>
