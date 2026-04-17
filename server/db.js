@@ -36,6 +36,15 @@ export const initDB = async () => {
         is_active BOOLEAN DEFAULT TRUE
       )
     `);
+    // Migration: Add is_active column if it doesn't exist in existing table
+    await client.query(`
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='is_active') THEN
+          ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+        END IF;
+      END $$;
+    `);
 
     // 2. Locations Table
     await client.query(`
