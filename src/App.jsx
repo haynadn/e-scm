@@ -169,7 +169,7 @@ function App() {
           <p>Logged in as: <strong>{session.username}</strong> ({session.role})</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
-          {(session.role === 'admin' || session.role === 'administrator') && (
+          {session.role === 'administrator' && (
             <>
               <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('master')}>
                 <Database size={18} /> Master Data
@@ -207,7 +207,7 @@ function App() {
           />
         )}
 
-        {currentView === 'master' && (session.role === 'admin' || session.role === 'administrator') && (
+        {currentView === 'master' && session.role === 'administrator' && (
           <MasterDataView 
             masterItems={masterItems}
             locations={locations}
@@ -241,7 +241,7 @@ function App() {
           />
         )}
 
-        {currentView === 'users' && (session.role === 'admin' || session.role === 'administrator') && (
+        {currentView === 'users' && session.role === 'administrator' && (
           <UserManagement 
             token={session.token}
             role={session.role}

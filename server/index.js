@@ -56,11 +56,11 @@ const authorizeAdministrator = (req, res, next) => {
   }
 };
 
-const authorizeAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || req.user.role === 'administrator')) {
+const authorizeEditor = (req, res, next) => {
+  if (req.user && (req.user.role === 'surveyor' || req.user.role === 'administrator' || req.user.role === 'admin')) {
     next();
   } else {
-    res.status(403).json({ error: 'Akses ditolak. Tingkat Admin atau Administrator diperlukan.' });
+    res.status(403).json({ error: 'Akses ditolak. Tingkat Surveyor atau Administrator diperlukan.' });
   }
 };
 
@@ -129,7 +129,7 @@ initDB().then(() => {
     }
   });
 
-  app.post('/api/import', authenticateToken, authorizeAdmin, async (req, res) => {
+  app.post('/api/import', authenticateToken, authorizeAdministrator, async (req, res) => {
     const { locations, masterItems } = req.body;
     const client = await db.connect();
     
@@ -230,7 +230,7 @@ initDB().then(() => {
     }
   });
 
-  app.put('/api/locations/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+  app.put('/api/locations/:id', authenticateToken, authorizeEditor, async (req, res) => {
     const locationId = req.params.id;
     const { name } = req.body;
     try {
@@ -263,7 +263,7 @@ initDB().then(() => {
     }
   });
 
-  app.get('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
+  app.get('/api/users', authenticateToken, authorizeAdministrator, async (req, res) => {
     try {
       const result = await db.query(`SELECT id, username, role, is_active FROM users ORDER BY id DESC`);
       res.json(result.rows);
@@ -298,7 +298,7 @@ initDB().then(() => {
     }
   });
 
-  app.post('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
+  app.post('/api/users', authenticateToken, authorizeAdministrator, async (req, res) => {
     const { username, password, role } = req.body;
     if (!username || !password || !role) {
       return res.status(400).json({ error: 'Data tidak lengkap' });

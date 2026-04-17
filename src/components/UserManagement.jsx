@@ -170,7 +170,7 @@ export default function UserManagement({ onBack, token, role }) {
                 onChange={e => setNewRole(e.target.value)}
               >
                 <option value="viewer">Viewer (Read Only)</option>
-                <option value="admin">Admin (Operational)</option>
+                <option value="surveyor">Surveyor (Edit/Check Data)</option>
                 {role === 'administrator' && <option value="administrator">Administrator (Super User)</option>}
               </select>
             </div>
@@ -213,10 +213,10 @@ export default function UserManagement({ onBack, token, role }) {
                           borderRadius: '20px', 
                           fontSize: '0.75rem', 
                           fontWeight: 600,
-                          backgroundColor: u.role === 'administrator' ? '#FEF3C7' : (u.role === 'admin' ? '#EEF2FF' : '#F3F4F6'),
-                          color: u.role === 'administrator' ? '#92400E' : (u.role === 'admin' ? 'var(--primary)' : '#4B5563')
+                          backgroundColor: u.role === 'administrator' ? '#FEF3C7' : (u.role === 'surveyor' ? '#D1FAE5' : '#F3F4F6'),
+                          color: u.role === 'administrator' ? '#92400E' : (u.role === 'surveyor' ? '#065F46' : '#4B5563')
                         }}>
-                          {u.role === 'administrator' ? <Shield size={12} /> : (u.role === 'admin' ? <Shield size={12} /> : <Eye size={12} />)}
+                          {u.role === 'administrator' ? <Shield size={12} /> : (u.role === 'surveyor' ? <Database size={12} /> : <Eye size={12} />)}
                           {u.role.toUpperCase()}
                         </span>
                       </td>
