@@ -304,6 +304,18 @@ export function useChecklist() {
         console.error(err);
         return false;
       }
+    },
+    fetchResetStatus: async (locationId) => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/locations/${locationId}/reset-status`, {
+          headers: { 'Authorization': `Bearer ${session.token}` }
+        });
+        if (res.ok) return await res.json();
+        return null;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
     }
   };
 }

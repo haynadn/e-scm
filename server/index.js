@@ -429,6 +429,23 @@ initDB().then(() => {
     }
   });
 
+  app.get('/api/locations/:id/reset-status', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await db.query(
+        'SELECT * FROM reset_requests WHERE location_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [id]
+      );
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        res.json(null);
+      }
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get('/api/logs', authenticateToken, authorizeEditor, async (req, res) => {
     try {
       let query = `SELECT * FROM activity_logs`;

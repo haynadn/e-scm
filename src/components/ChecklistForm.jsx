@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Camera, Upload, Trash2 } from 'lucide-react';
 
-export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role, onRequestReset }) {
+export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role, onRequestReset, onFetchResetStatus }) {
   const isReadOnly = role === 'viewer';
   const [formData, setFormData] = useState({});
   const [address, setAddress] = useState(location.address || '');
+  const [activeRequest, setActiveRequest] = useState(null);
+
+  useEffect(() => {
+    const checkResetStatus = async () => {
+      const status = await onFetchResetStatus(location.id);
+      setActiveRequest(status);
+    };
+    if (location.id) checkResetStatus();
+  }, [location.id]);
 
   useEffect(() => {
     const initialData = {};
@@ -92,13 +101,18 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
               <button 
                 type="button" 
                 className="btn btn-outline-danger" 
+                disabled={activeRequest?.status === 'pending'}
                 onClick={() => {
                   if (window.confirm(`Minta Administrator untuk menghapus/reset semua data di ${location.name}?`)) {
-                    onRequestReset(location.id, location.name);
+                    onRequestReset(location.id, location.name).then(() => {
+                      // Refresh status after request
+                      onFetchResetStatus(location.id).then(setActiveRequest);
+                    });
                   }
                 }}
               >
-                <Trash2 size={18} className="mr-2" /> Minta Reset
+                <Trash2 size={18} className="mr-2" /> 
+                {activeRequest?.status === 'pending' ? 'Tunggu Approval...' : 'Minta Reset'}
               </button>
             )}
             {!isReadOnly && (
@@ -108,6 +122,33 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             )}
           </div>
         </div>
+
+        {/* Reset Request Status Notification Banner */}
+        {activeRequest && activeRequest.status !== 'approved' && (
+          <div className={`mt-3 p-3 flex-between`} style={{ 
+            borderRadius: '8px', 
+            backgroundColor: activeRequest.status === 'pending' ? '#FFFBEB' : '#FEF2F2',
+            border: `1px solid ${activeRequest.status === 'pending' ? '#FEF3C7' : '#FEE2E2'}`,
+            color: activeRequest.status === 'pending' ? '#92400E' : '#991B1B'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <AlertCircle size={20} />
+              <div style={{ fontSize: '0.9rem' }}>
+                {activeRequest.status === 'pending' ? (
+                  <><strong>Permintaan Reset Sedang Diproses:</strong> Menunggu persetujuan dari Administrator.</>
+                ) : (
+                  <><strong>Permintaan Reset Ditolak:</strong> Admin menolak permintaan pembersihan data untuk lokasi ini.</>
+                )}
+              </div>
+            </div>
+            {activeRequest.status === 'rejected' && (
+              <button className="btn-icon" onClick={() => setActiveRequest(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        )}
+
         <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
           <label className="form-label" style={{ fontWeight: 600 }}>Alamat / Deskripsi Tambahan :</label>
           <textarea 

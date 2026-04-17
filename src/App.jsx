@@ -20,7 +20,7 @@ function App() {
     isLoaded, session, loginSuccess, performLogout, 
     locations, masterItems, checklists, saveChecklist, getStats, 
     importMasterData, clearAllData, updateLocationName,
-    requestReset, fetchResetRequests, handleResetApproval
+    requestReset, fetchResetRequests, handleResetApproval, fetchResetStatus
   } = useChecklist();
   
   // view: 'dashboard' | 'locations' | 'checklist' | 'master' | 'users'
@@ -249,6 +249,7 @@ function App() {
             onBack={() => navigateTo('locations')}
             role={session.role}
             onRequestReset={requestReset}
+            onFetchResetStatus={fetchResetStatus}
           />
         )}
 
