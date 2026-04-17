@@ -3,10 +3,11 @@ import Dashboard from './components/Dashboard';
 import LocationList from './components/LocationList';
 import ChecklistForm from './components/ChecklistForm';
 import MasterDataView from './components/MasterDataView';
+import UserManagement from './components/UserManagement';
 import Login from './components/Login';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import { useChecklist } from './hooks/useChecklist';
-import { Database, LogOut, ShieldCheck } from 'lucide-react';
+import { Database, LogOut, ShieldCheck, Users } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import './index.css';
@@ -17,7 +18,7 @@ function App() {
     locations, masterItems, checklists, saveChecklist, getStats, importMasterData, clearAllData, updateLocationName 
   } = useChecklist();
   
-  // view: 'dashboard' | 'locations' | 'checklist' | 'master'
+  // view: 'dashboard' | 'locations' | 'checklist' | 'master' | 'users'
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -83,9 +84,14 @@ function App() {
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {session.role === 'admin' && (
-            <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('master')}>
-              <Database size={18} /> Master Data
-            </button>
+            <>
+              <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('master')}>
+                <Database size={18} /> Master Data
+              </button>
+              <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('users')}>
+                <Users size={18} /> User Management
+              </button>
+            </>
           )}
           <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => setIsPasswordModalOpen(true)}>
             <ShieldCheck size={18} /> Password
@@ -145,6 +151,13 @@ function App() {
             onSave={saveChecklist}
             onBack={() => navigateTo('locations')}
             role={session.role}
+          />
+        )}
+
+        {currentView === 'users' && session.role === 'admin' && (
+          <UserManagement 
+            token={session.token}
+            onBack={() => navigateTo('dashboard')}
           />
         )}
       </main>

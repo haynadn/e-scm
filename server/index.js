@@ -251,6 +251,32 @@ initDB().then(() => {
     }
   });
 
+  app.get('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+      const result = await db.query(`SELECT id, username, role FROM users ORDER BY id DESC`);
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { username, password, role } = req.body;
+    if (!username || !password || !role) {
+      return res.status(400).json({ error: 'Data tidak lengkap' });
+    }
+    try {
+      const hash = bcrypt.hashSync(password, 10);
+      await db.query(`INSERT INTO users (username, password, role) VALUES ($1, $2, $3)`, [username, hash, role]);
+      res.json({ success: true, message: 'User berhasil ditambahkan' });
+    } catch (err) {
+      if (err.code === '23505') { // Postgres unique_violation
+        return res.status(400).json({ error: 'Username sudah digunakan' });
+      }
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.delete('/api/clear', authenticateToken, authorizeAdmin, async (req, res) => {
     const client = await db.connect();
     try {
