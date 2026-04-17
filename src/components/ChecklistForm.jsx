@@ -145,7 +145,7 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {activeRequest.status === 'approved' && (
-                <button className="btn btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', borderColor: '#166534', color: '#166534' }} onClick={onRefreshData}>
+                <button className="btn btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', borderColor: '#166534', color: '#166534' }} onClick={() => onRefreshData()}>
                    Sinkronkan Data
                 </button>
               )}
