@@ -356,6 +356,79 @@ initDB().then(() => {
     }
   });
 
+  // Approval Workflow: Reset Location Data
+  app.post('/api/reset-requests', authenticateToken, async (req, res) => {
+    const { locationId, locationName } = req.body;
+    if (req.user.role === 'viewer') return res.status(403).json({ error: 'View-only users cannot request reset' });
+
+    try {
+      // Check if there's already a pending request for this location
+      const checkRes = await db.query(
+        'SELECT * FROM reset_requests WHERE location_id = $1 AND status = \'pending\'',
+        [locationId]
+      );
+      if (checkRes.rows.length > 0) {
+        return res.status(400).json({ error: 'Permintaan reset untuk lokasi ini masih menunggu persetujuan.' });
+      }
+
+      await db.query(
+        'INSERT INTO reset_requests (location_id, location_name, requested_by) VALUES ($1, $2, $3)',
+        [locationId, locationName, req.user.username]
+      );
+      logActivity(req.user.id, req.user.username, 'REQUEST_RESET', `Location: ${locationName} (${locationId})`);
+      res.json({ success: true, message: 'Permintaan reset telah dikirim ke Administrator.' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/reset-requests', authenticateToken, authorizeAdministrator, async (req, res) => {
+    try {
+      const result = await db.query('SELECT * FROM reset_requests WHERE status = \'pending\' ORDER BY created_at DESC');
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/reset-requests/:id', authenticateToken, authorizeAdministrator, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; // 'approved' or 'rejected'
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+      const reqRes = await client.query('SELECT * FROM reset_requests WHERE id = $1', [id]);
+      const resetReq = reqRes.rows[0];
+
+      if (!resetReq) return res.status(404).json({ error: 'Request not found' });
+
+      await client.query('UPDATE reset_requests SET status = $1 WHERE id = $2', [status, id]);
+
+      if (status === 'approved') {
+        const locId = resetReq.location_id;
+        // Execute the heavy clear logic
+        await client.query('DELETE FROM checklists WHERE locationId = $1', [locId]);
+        await client.query('UPDATE locations SET isCompleted = FALSE, address = \'\' WHERE id = $1', [locId]);
+        logActivity(req.user.id, req.user.username, 'APPROVE_RESET', `Approved reset for ${resetReq.location_name}`);
+      } else {
+        logActivity(req.user.id, req.user.username, 'REJECT_RESET', `Rejected reset for ${resetReq.location_name}`);
+      }
+
+      await client.query('COMMIT');
+      res.json({ success: true, message: `Permintaan reset telah ${status === 'approved' ? 'disetujui' : 'ditolak'}.` });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      res.status(500).json({ error: err.message });
+    } finally {
+      client.release();
+    }
+  });
+
   app.get('/api/logs', authenticateToken, authorizeEditor, async (req, res) => {
     try {
       let query = `SELECT * FROM activity_logs`;

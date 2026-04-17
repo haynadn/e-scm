@@ -5,10 +5,11 @@ import ChecklistForm from './components/ChecklistForm';
 import MasterDataView from './components/MasterDataView';
 import UserManagement from './components/UserManagement';
 import ActivityLogsView from './components/ActivityLogsView';
+import ApprovalsView from './components/ApprovalsView';
 import Login from './components/Login';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import { useChecklist } from './hooks/useChecklist';
-import { Database, LogOut, ShieldCheck, Users, MapPin, History } from 'lucide-react';
+import { Database, LogOut, ShieldCheck, Users, MapPin, History, Inbox } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -17,7 +18,9 @@ import './index.css';
 function App() {
   const { 
     isLoaded, session, loginSuccess, performLogout, 
-    locations, masterItems, checklists, saveChecklist, getStats, importMasterData, clearAllData, updateLocationName 
+    locations, masterItems, checklists, saveChecklist, getStats, 
+    importMasterData, clearAllData, updateLocationName,
+    requestReset, fetchResetRequests, handleResetApproval
   } = useChecklist();
   
   // view: 'dashboard' | 'locations' | 'checklist' | 'master' | 'users'
@@ -181,6 +184,9 @@ function App() {
               <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('logs')}>
                 <History size={18} /> Logs
               </button>
+              <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('approvals')}>
+                <Inbox size={18} /> Persetujuan
+              </button>
             </>
           )}
           <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => setIsPasswordModalOpen(true)}>
@@ -242,6 +248,7 @@ function App() {
             onSave={saveChecklist}
             onBack={() => navigateTo('locations')}
             role={session.role}
+            onRequestReset={requestReset}
           />
         )}
 
@@ -256,6 +263,14 @@ function App() {
         {currentView === 'logs' && session.role === 'administrator' && (
           <ActivityLogsView 
             token={session.token}
+            onBack={() => navigateTo('dashboard')}
+          />
+        )}
+
+        {currentView === 'approvals' && session.role === 'administrator' && (
+          <ApprovalsView 
+            fetchResetRequests={fetchResetRequests}
+            handleResetApproval={handleResetApproval}
             onBack={() => navigateTo('dashboard')}
           />
         )}

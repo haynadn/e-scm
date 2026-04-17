@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Camera, Upload, Trash2 } from 'lucide-react';
 
-export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role }) {
+export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role, onRequestReset }) {
   const isReadOnly = role === 'viewer';
   const [formData, setFormData] = useState({});
   const [address, setAddress] = useState(location.address || '');
@@ -87,11 +87,26 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             <p className="text-muted ml-2" style={{ display: 'inline-block' }}>({location.id})</p>
             {isReadOnly && <span style={{ marginLeft: '1rem', padding: '0.25rem 0.75rem', backgroundColor: '#F3F4F6', color: '#4B5563', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>READ ONLY MODE</span>}
           </div>
-          {!isReadOnly && (
-            <button className="btn btn-primary" onClick={handleSubmit}>
-              <Save size={18} /> Save Data
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            {!isReadOnly && (
+              <button 
+                type="button" 
+                className="btn btn-outline-danger" 
+                onClick={() => {
+                  if (window.confirm(`Minta Administrator untuk menghapus/reset semua data di ${location.name}?`)) {
+                    onRequestReset(location.id, location.name);
+                  }
+                }}
+              >
+                <Trash2 size={18} className="mr-2" /> Minta Reset
+              </button>
+            )}
+            {!isReadOnly && (
+              <button className="btn btn-primary" onClick={handleSubmit}>
+                <Save size={18} className="mr-2" /> Save Data
+              </button>
+            )}
+          </div>
         </div>
         <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
           <label className="form-label" style={{ fontWeight: 600 }}>Alamat / Deskripsi Tambahan :</label>

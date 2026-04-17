@@ -92,6 +92,18 @@ export const initDB = async () => {
       )
     `);
 
+    // 6. Reset Requests Table (Approval Workflow)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS reset_requests (
+        id SERIAL PRIMARY KEY,
+        location_id TEXT REFERENCES locations(id),
+        location_name TEXT,
+        requested_by TEXT,
+        status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Ensure we have an administrator
     const adminHash = bcrypt.hashSync('password123', 10);
     // Upgrade existing 'admin' to 'administrator' or create new one

@@ -249,6 +249,61 @@ export function useChecklist() {
     getStats,
     importMasterData,
     clearAllData,
-    updateLocationName
+    updateLocationName,
+    requestReset: async (locationId, locationName) => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/reset-requests`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ locationId, locationName })
+        });
+        const result = await res.json();
+        if (res.ok) {
+          alert(result.message);
+          return true;
+        } else {
+          alert(result.error);
+          return false;
+        }
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    },
+    fetchResetRequests: async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/reset-requests`, {
+          headers: { 'Authorization': `Bearer ${session.token}` }
+        });
+        if (res.ok) return await res.json();
+        return [];
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    },
+    handleResetApproval: async (requestId, status) => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/reset-requests/${requestId}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          await loadOnlineData();
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    }
   };
 }
