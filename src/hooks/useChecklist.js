@@ -316,6 +316,7 @@ export function useChecklist() {
         console.error(err);
         return null;
       }
-    }
+    },
+    refreshData: loadOnlineData
   };
 }

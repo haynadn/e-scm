@@ -11,9 +11,15 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
     const checkResetStatus = async () => {
       const status = await onFetchResetStatus(location.id);
       setActiveRequest(status);
+      
+      // If Admin has approved the reset, but our local data hasn't refreshed yet
+      if (status && status.status === 'approved' && savedData && savedData.length > 0) {
+        console.log("Detecting approved reset, refreshing data...");
+        onRefreshData();
+      }
     };
     if (location.id) checkResetStatus();
-  }, [location.id]);
+  }, [location.id, savedData, onFetchResetStatus, onRefreshData]);
 
   useEffect(() => {
     const initialData = {};
