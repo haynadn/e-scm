@@ -32,7 +32,8 @@ export const initDB = async () => {
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT DEFAULT 'surveyor'
+        role TEXT DEFAULT 'viewer',
+        is_active BOOLEAN DEFAULT TRUE
       )
     `);
 
@@ -70,19 +71,20 @@ export const initDB = async () => {
       )
     `);
 
-    // Default Admin User
+    // Ensure we have an administrator
     const adminHash = bcrypt.hashSync('password123', 10);
+    // Upgrade existing 'admin' to 'administrator' or create new one
     await client.query(`
-      INSERT INTO users (username, password, role)
-      VALUES ('admin', $1, 'admin')
-      ON CONFLICT (username) DO NOTHING
+      INSERT INTO users (username, password, role, is_active)
+      VALUES ('admin', $1, 'administrator', TRUE)
+      ON CONFLICT (username) DO UPDATE SET role = 'administrator', is_active = TRUE
     `, [adminHash]);
 
     // Default Viewer User
     const viewerHash = bcrypt.hashSync('password123', 10);
     await client.query(`
-      INSERT INTO users (username, password, role)
-      VALUES ('user', $1, 'viewer')
+      INSERT INTO users (username, password, role, is_active)
+      VALUES ('user', $1, 'viewer', TRUE)
       ON CONFLICT (username) DO NOTHING
     `, [viewerHash]);
 

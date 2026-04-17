@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { UploadCloud, Database, Trash2, ArrowLeft, DownloadCloud } from 'lucide-react';
 
-export default function MasterDataView({ masterItems, locations, onImport, onClear, onBack }) {
+export default function MasterDataView({ masterItems, locations, onImport, onClear, onBack, role }) {
   const [importStatus, setImportStatus] = useState('');
 
   const handleDownloadTemplate = () => {
@@ -118,9 +118,11 @@ export default function MasterDataView({ masterItems, locations, onImport, onCle
             <DownloadCloud size={18} /> Download Excel Template
           </button>
           
-          <button className="btn btn-outline" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={onClear}>
-            <Trash2 size={18} /> Clear All Data
-          </button>
+          {role === 'administrator' && (
+            <button className="btn btn-outline" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={onClear}>
+              <Trash2 size={18} /> Clear All Data
+            </button>
+          )}
         </div>
 
         <div className="upload-zone" style={{ padding: '2rem' }}>

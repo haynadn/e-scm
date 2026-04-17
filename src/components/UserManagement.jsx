@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Users, ArrowLeft, Shield, Eye, Trash2 } from 'lucide-react';
 
-export default function UserManagement({ onBack, token }) {
+export default function UserManagement({ onBack, token, role }) {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newUsername, setNewUsername] = useState('');
@@ -65,6 +65,57 @@ export default function UserManagement({ onBack, token }) {
     }
   };
 
+  const handleToggleStatus = async (user) => {
+    if (role !== 'administrator') return;
+    try {
+      const BASE_URL = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
+      const newStatus = !user.is_active;
+      
+      // Optimistic UI update
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u));
+      
+      const res = await fetch(`${BASE_URL}/users/${user.id}/status`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_active: newStatus })
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.error || 'Gagal merubah status');
+        fetchUsers(); // Rollback
+      }
+    } catch (err) {
+      console.error(err);
+      fetchUsers();
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (role !== 'administrator') return;
+    if (!window.confirm(`Hapus user "${user.username}" secara permanen?`)) return;
+
+    try {
+      const BASE_URL = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
+      const res = await fetch(`${BASE_URL}/users/${user.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== user.id));
+        setMessage({ text: 'User berhasil dihapus', type: 'success' });
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal menghapus user');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="flex-between mb-4">
@@ -119,7 +170,8 @@ export default function UserManagement({ onBack, token }) {
                 onChange={e => setNewRole(e.target.value)}
               >
                 <option value="viewer">Viewer (Read Only)</option>
-                <option value="admin">Admin (Full Access)</option>
+                <option value="admin">Admin (Operational)</option>
+                {role === 'administrator' && <option value="administrator">Administrator (Super User)</option>}
               </select>
             </div>
             <button type="submit" className="btn btn-primary w-full" disabled={isSubmitting}>
@@ -138,14 +190,20 @@ export default function UserManagement({ onBack, token }) {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ textAlign: 'left', padding: '0.75rem' }}>Username</th>
+                    <th style={{ textAlign: 'left', padding: '0.75rem' }}>User</th>
                     <th style={{ textAlign: 'center', padding: '0.75rem' }}>Role</th>
+                    {role === 'administrator' && <th style={{ textAlign: 'right', padding: '0.75rem' }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {users.map(u => (
                     <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '0.75rem', fontWeight: 500 }}>{u.username}</td>
+                      <td style={{ padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600 }}>{u.username}</div>
+                        <div style={{ fontSize: '0.7rem', color: u.is_active ? '#059669' : '#DC2626' }}>
+                          ● {u.is_active ? 'Active' : 'Inactive'}
+                        </div>
+                      </td>
                       <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                         <span style={{ 
                           display: 'inline-flex', 
@@ -155,12 +213,32 @@ export default function UserManagement({ onBack, token }) {
                           borderRadius: '20px', 
                           fontSize: '0.75rem', 
                           fontWeight: 600,
-                          backgroundColor: u.role === 'admin' ? '#EEF2FF' : '#F3F4F6',
-                          color: u.role === 'admin' ? 'var(--primary)' : '#4B5563'
+                          backgroundColor: u.role === 'administrator' ? '#FEF3C7' : (u.role === 'admin' ? '#EEF2FF' : '#F3F4F6'),
+                          color: u.role === 'administrator' ? '#92400E' : (u.role === 'admin' ? 'var(--primary)' : '#4B5563')
                         }}>
-                          {u.role === 'admin' ? <Shield size={12} /> : <Eye size={12} />}
+                          {u.role === 'administrator' ? <Shield size={12} /> : (u.role === 'admin' ? <Shield size={12} /> : <Eye size={12} />)}
                           {u.role.toUpperCase()}
                         </span>
+                      </td>
+                      <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                        {role === 'administrator' && (
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button 
+                              className="btn btn-outline" 
+                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: u.is_active ? '#DC2626' : '#059669', color: u.is_active ? '#DC2626' : '#059669' }}
+                              onClick={() => handleToggleStatus(u)}
+                            >
+                              {u.is_active ? 'Disable' : 'Enable'}
+                            </button>
+                            <button 
+                              className="btn btn-outline" 
+                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderColor: '#DC2626', color: '#DC2626' }}
+                              onClick={() => handleDeleteUser(u)}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

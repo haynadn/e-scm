@@ -48,11 +48,19 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-const authorizeAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+const authorizeAdministrator = (req, res, next) => {
+  if (req.user && req.user.role === 'administrator') {
     next();
   } else {
-    res.status(403).json({ error: 'Akses ditolak. Hanya Admin yang diperbolehkan.' });
+    res.status(403).json({ error: 'Akses ditolak. Tingkat Administrator diperlukan.' });
+  }
+};
+
+const authorizeAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'administrator')) {
+    next();
+  } else {
+    res.status(403).json({ error: 'Akses ditolak. Tingkat Admin atau Administrator diperlukan.' });
   }
 };
 
@@ -68,6 +76,10 @@ initDB().then(() => {
 
       const isValid = bcrypt.compareSync(password, row.password);
       if(!isValid) return res.status(400).json({ error: 'Invalid password' });
+
+      if (row.is_active === false) {
+        return res.status(403).json({ error: 'Akun Anda dinonaktifkan. Silakan hubungi Administrator.' });
+      }
 
       const token = jwt.sign({ id: row.id, username: row.username, role: row.role }, JWT_SECRET);
       res.json({ token, role: row.role, username: row.username });
@@ -253,8 +265,34 @@ initDB().then(() => {
 
   app.get('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
     try {
-      const result = await db.query(`SELECT id, username, role FROM users ORDER BY id DESC`);
+      const result = await db.query(`SELECT id, username, role, is_active FROM users ORDER BY id DESC`);
       res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/users/:id/status', authenticateToken, authorizeAdministrator, async (req, res) => {
+    const { id } = req.params;
+    const { is_active } = req.body;
+    try {
+      // Prevent self-deactivation if you're the last admin? (simplified for now)
+      await db.query(`UPDATE users SET is_active = $1 WHERE id = $2`, [is_active, id]);
+      res.json({ success: true, message: 'Status user diperbarui' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/users/:id', authenticateToken, authorizeAdministrator, async (req, res) => {
+    const { id } = req.params;
+    try {
+      // Prevent self-deletion
+      if (req.user.id == id) {
+        return res.status(400).json({ error: 'Tidak bisa menghapus akun sendiri' });
+      }
+      await db.query(`DELETE FROM users WHERE id = $1`, [id]);
+      res.json({ success: true, message: 'User berhasil dihapus' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -277,7 +315,7 @@ initDB().then(() => {
     }
   });
 
-  app.delete('/api/clear', authenticateToken, authorizeAdmin, async (req, res) => {
+  app.delete('/api/clear', authenticateToken, authorizeAdministrator, async (req, res) => {
     const client = await db.connect();
     try {
       await client.query("BEGIN");
