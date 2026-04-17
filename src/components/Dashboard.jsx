@@ -173,13 +173,6 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
         </div>
       </div>
 
-      {role !== 'viewer' && (
-        <div className="text-center mt-4">
-          <button className="btn btn-primary" onClick={() => onNavigate('locations')}>
-             Start Filling Checklist <MapPin className="ml-2" size={18} />
-          </button>
-        </div>
-      )}
 
       {activeModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>

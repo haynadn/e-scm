@@ -7,7 +7,7 @@ import UserManagement from './components/UserManagement';
 import Login from './components/Login';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import { useChecklist } from './hooks/useChecklist';
-import { Database, LogOut, ShieldCheck, Users } from 'lucide-react';
+import { Database, LogOut, ShieldCheck, Users, MapPin } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import './index.css';
@@ -83,6 +83,11 @@ function App() {
           <p>Logged in as: <strong>{session.username}</strong> ({session.role})</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {session.role !== 'viewer' && (
+             <button className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.2)' }} onClick={() => navigateTo('locations')}>
+               Start Filling <MapPin className="ml-2" size={18} />
+             </button>
+          )}
           {session.role === 'admin' && (
             <>
               <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('master')}>
