@@ -77,15 +77,15 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="header" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ flex: 1 }}>
+      <header className="header" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem' }}>
+        <div style={{ width: '100%' }}>
           <h1>Sigma CMO - Checklist Manager Online</h1>
           <p>Logged in as: <strong>{session.username}</strong> ({session.role})</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
           {session.role !== 'viewer' && (
-             <button className="btn btn-primary" style={{ padding: '0.6rem 1.25rem', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.2)' }} onClick={() => navigateTo('locations')}>
-               Start Filling <MapPin className="ml-2" size={18} />
+             <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.6rem 1.25rem', fontWeight: 700, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} onClick={() => navigateTo('locations')}>
+               Start Filling <MapPin className="ml-1" size={18} />
              </button>
           )}
           {session.role === 'admin' && (
