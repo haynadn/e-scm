@@ -185,6 +185,10 @@ export default function UserManagement({ onBack, token, role }) {
           <h3 className="mb-4">Daftar User Sistem</h3>
           {isLoading ? (
             <div className="text-center py-4">Loading user data...</div>
+          ) : !Array.isArray(users) ? (
+            <div style={{ padding: '1rem', backgroundColor: '#FEE2E2', color: '#B91C1C', borderRadius: '8px' }}>
+              Gagal memuat data user. Silakan coba Logout dan Login kembali untuk memperbarui sesi Anda.
+            </div>
           ) : (
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -196,6 +200,9 @@ export default function UserManagement({ onBack, token, role }) {
                   </tr>
                 </thead>
                 <tbody>
+                  {users.length === 0 && (
+                    <tr><td colSpan={3} className="text-center py-4">Tidak ada user ditemukan.</td></tr>
+                  )}
                   {users.map(u => (
                     <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '0.75rem' }}>

@@ -4,10 +4,11 @@ import LocationList from './components/LocationList';
 import ChecklistForm from './components/ChecklistForm';
 import MasterDataView from './components/MasterDataView';
 import UserManagement from './components/UserManagement';
+import ActivityLogsView from './components/ActivityLogsView';
 import Login from './components/Login';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import { useChecklist } from './hooks/useChecklist';
-import { Database, LogOut, ShieldCheck, Users, MapPin } from 'lucide-react';
+import { Database, LogOut, ShieldCheck, Users, MapPin, History } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -177,6 +178,9 @@ function App() {
               <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('users')}>
                 <Users size={18} /> User Management
               </button>
+              <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => navigateTo('logs')}>
+                <History size={18} /> Logs
+              </button>
             </>
           )}
           <button className="btn" style={{ backgroundColor: 'white', color: 'var(--primary)', padding: '0.5rem 1rem' }} onClick={() => setIsPasswordModalOpen(true)}>
@@ -245,6 +249,13 @@ function App() {
           <UserManagement 
             token={session.token}
             role={session.role}
+            onBack={() => navigateTo('dashboard')}
+          />
+        )}
+
+        {currentView === 'logs' && session.role === 'administrator' && (
+          <ActivityLogsView 
+            token={session.token}
             onBack={() => navigateTo('dashboard')}
           />
         )}

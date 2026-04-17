@@ -80,6 +80,18 @@ export const initDB = async () => {
       )
     `);
 
+    // 5. Activity Logs Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        username TEXT,
+        action TEXT,
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Ensure we have an administrator
     const adminHash = bcrypt.hashSync('password123', 10);
     // Upgrade existing 'admin' to 'administrator' or create new one

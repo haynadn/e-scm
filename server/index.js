@@ -64,6 +64,17 @@ const authorizeEditor = (req, res, next) => {
   }
 };
 
+const logActivity = async (userId, username, action, details) => {
+  try {
+    await db.query(
+      'INSERT INTO activity_logs (user_id, username, action, details) VALUES ($1, $2, $3, $4)',
+      [userId, username, action, details]
+    );
+  } catch (err) {
+    console.error('Logging Error:', err);
+  }
+};
+
 // Start Server & DB
 initDB().then(() => {
   app.post('/api/login', async (req, res) => {
@@ -72,15 +83,23 @@ initDB().then(() => {
       const result = await db.query(`SELECT * FROM users WHERE username = $1`, [username]);
       const row = result.rows[0];
       
-      if(!row) return res.status(400).json({ error: 'Invalid username' });
+      if(!row) {
+        logActivity(null, username, 'LOGIN_FAILED', 'Username not found');
+        return res.status(400).json({ error: 'Invalid username' });
+      }
 
       const isValid = bcrypt.compareSync(password, row.password);
-      if(!isValid) return res.status(400).json({ error: 'Invalid password' });
+      if(!isValid) {
+        logActivity(row.id, row.username, 'LOGIN_FAILED', 'Invalid password attempt');
+        return res.status(400).json({ error: 'Invalid password' });
+      }
 
       if (row.is_active === false) {
+        logActivity(row.id, row.username, 'LOGIN_BLOCKED', 'Inactive account attempt');
         return res.status(403).json({ error: 'Akun Anda dinonaktifkan. Silakan hubungi Administrator.' });
       }
 
+      logActivity(row.id, row.username, 'LOGIN_SUCCESS', 'User logged in');
       const token = jwt.sign({ id: row.id, username: row.username, role: row.role }, JWT_SECRET);
       res.json({ token, role: row.role, username: row.username });
     } catch (err) {
@@ -157,6 +176,7 @@ initDB().then(() => {
       }
 
       await client.query("COMMIT");
+      logActivity(req.user.id, req.user.username, 'IMPORT_DATA', `Imported ${locations?.length || 0} locs, ${masterItems?.length || 0} items`);
       res.json({ success: true, message: "Master Data imported successfully to Remote DB." });
     } catch (err) {
       await client.query("ROLLBACK");
@@ -221,6 +241,7 @@ initDB().then(() => {
       }
 
       await client.query("COMMIT");
+      logActivity(req.user.id, req.user.username, 'SUBMIT_CHECKLIST', `Location ID: ${locationId}, Items: ${itemsData.length}, Status: ${isCompleted?'Completed':'Draft'}`);
       res.json({ success: true });
     } catch (err) {
       await client.query("ROLLBACK");
@@ -276,8 +297,8 @@ initDB().then(() => {
     const { id } = req.params;
     const { is_active } = req.body;
     try {
-      // Prevent self-deactivation if you're the last admin? (simplified for now)
       await db.query(`UPDATE users SET is_active = $1 WHERE id = $2`, [is_active, id]);
+      logActivity(req.user.id, req.user.username, 'TOGGLE_USER_STATUS', `User ID ${id} set to active=${is_active}`);
       res.json({ success: true, message: 'Status user diperbarui' });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -292,6 +313,7 @@ initDB().then(() => {
         return res.status(400).json({ error: 'Tidak bisa menghapus akun sendiri' });
       }
       await db.query(`DELETE FROM users WHERE id = $1`, [id]);
+      logActivity(req.user.id, req.user.username, 'DELETE_USER', `Deleted User ID ${id}`);
       res.json({ success: true, message: 'User berhasil dihapus' });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -306,6 +328,7 @@ initDB().then(() => {
     try {
       const hash = bcrypt.hashSync(password, 10);
       await db.query(`INSERT INTO users (username, password, role) VALUES ($1, $2, $3)`, [username, hash, role]);
+      logActivity(req.user.id, req.user.username, 'CREATE_USER', `Created user: ${username} as ${role}`);
       res.json({ success: true, message: 'User berhasil ditambahkan' });
     } catch (err) {
       if (err.code === '23505') { // Postgres unique_violation
@@ -323,12 +346,22 @@ initDB().then(() => {
       await client.query('DELETE FROM locations');
       await client.query('DELETE FROM master_items');
       await client.query("COMMIT");
+      logActivity(req.user.id, req.user.username, 'CLEAR_DATABASE', 'Wiped all checklist, location, and master data');
       res.json({ success: true, message: "Wiped effectively" });
     } catch (err) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: err.message });
     } finally {
       client.release();
+    }
+  });
+
+  app.get('/api/logs', authenticateToken, authorizeAdministrator, async (req, res) => {
+    try {
+      const result = await db.query(`SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 200`);
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   });
 
