@@ -166,6 +166,7 @@ export function useChecklist() {
       rusakBerat: 0,
       hilang: 0
     };
+    const itemConditionBreakdown = {}; // { itemId: { Bagus: 0, 'Rusak Ringan': 0, ... } }
 
     const safeLocations = data.locations || [];
     const safeMasterItems = data.masterItems || [];
@@ -193,6 +194,11 @@ export function useChecklist() {
           else if (chk.kondisi === 'Rusak Ringan') conditions.rusakRingan++;
           else if (chk.kondisi === 'Rusak Berat') conditions.rusakBerat++;
           else if (chk.kondisi === 'Hilang') conditions.hilang++;
+
+          if (!itemConditionBreakdown[chk.idItem]) {
+            itemConditionBreakdown[chk.idItem] = { 'Bagus': 0, 'Rusak Ringan': 0, 'Rusak Berat': 0, 'Hilang': 0 };
+          }
+          itemConditionBreakdown[chk.idItem][chk.kondisi]++;
         }
       });
     });
@@ -204,7 +210,8 @@ export function useChecklist() {
       totalItemsChecked,
       matchingItems,
       nonMatchingItems,
-      conditionStats: conditions
+      conditionStats: conditions,
+      itemConditionBreakdown
     };
   };
 

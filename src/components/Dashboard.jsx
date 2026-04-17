@@ -127,6 +127,52 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
         </div>
       </div>
       
+      {/* Item Detail Breakdown Section */}
+      <div className="card mt-4">
+        <h3 className="mb-4">Item Condition Breakdown Detail</h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                <th style={{ padding: '1rem', color: 'var(--text-muted)' }}>Nama Item</th>
+                <th style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#ECFDF5', color: '#065F46' }}>Bagus</th>
+                <th style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#FFFBEB', color: '#92400E' }}>Rusak Rgn.</th>
+                <th style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#FEF2F2', color: '#991B1B' }}>Rusak Brt.</th>
+                <th style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#F9FAFB', color: '#4B5563' }}>Hilang</th>
+                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {masterItems.map(item => {
+                const breakdown = stats.itemConditionBreakdown?.[item.id] || { 'Bagus': 0, 'Rusak Ringan': 0, 'Rusak Berat': 0, 'Hilang': 0 };
+                const total = breakdown['Bagus'] + breakdown['Rusak Ringan'] + breakdown['Rusak Berat'] + breakdown['Hilang'];
+                
+                return (
+                  <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontWeight: 600 }}>{item.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {item.id}</div>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#059669' }}>{breakdown['Bagus'] || '-'}</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#D97706' }}>{breakdown['Rusak Ringan'] || '-'}</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#DC2626' }}>{breakdown['Rusak Berat'] || '-'}</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#4B5563' }}>{breakdown['Hilang'] || '-'}</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>{total || '-'}</td>
+                  </tr>
+                );
+              })}
+              {masterItems.length === 0 && (
+                <tr>
+                   <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                     No master items found.
+                   </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {role !== 'viewer' && (
         <div className="text-center mt-4">
           <button className="btn btn-primary" onClick={() => onNavigate('locations')}>
