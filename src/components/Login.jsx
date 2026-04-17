@@ -42,7 +42,7 @@ export default function Login({ onLoginSuccess }) {
           <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: '#EEF2FF', borderRadius: '50%', color: 'var(--primary)', marginBottom: '1rem' }}>
             <Lock size={32} />
           </div>
-          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.5rem', lineHeight: '1.2' }}>Sigma Online<br/>Equipment Checklist</h2>
+          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.5rem', lineHeight: '1.2' }}>Sigma CMO<br/>Checklist Manager Online</h2>
         </div>
         
         {error && (
