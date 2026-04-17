@@ -39,10 +39,10 @@ export default function Login({ onLoginSuccess }) {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--background)' }}>
       <div className="card animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '2rem' }}>
         <div className="text-center mb-4">
-          <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: '#EEF2FF', borderRadius: '50%', color: 'var(--primary)', marginBottom: '1rem' }}>
+          <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: '#e0f2fe', borderRadius: '50%', color: 'var(--primary)', marginBottom: '1rem' }}>
             <Lock size={32} />
           </div>
-          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.5rem', lineHeight: '1.2' }}>Sigma CMO<br/>Checklist Manager Online</h2>
+          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem', fontSize: '1.5rem', lineHeight: '1.2' }}>Sigma CMO<br/><span style={{ color: 'var(--secondary)', fontSize: '1.1rem' }}>Checklist Manager Online</span></h2>
         </div>
         
         {error && (

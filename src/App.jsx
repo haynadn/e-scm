@@ -9,6 +9,7 @@ import ChangePasswordModal from './components/ChangePasswordModal';
 import { useChecklist } from './hooks/useChecklist';
 import { Database, LogOut, ShieldCheck, Users, MapPin } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import './index.css';
 
@@ -40,39 +41,99 @@ function App() {
     }
   };
 
-  const handleExportReport = () => {
-    const reportData = [];
-    locations.forEach(loc => {
-      if (loc.isCompleted && checklists[loc.id]) {
-        checklists[loc.id].forEach(chkItem => {
-          const master = masterItems.find(m => m.id === chkItem.idItem);
-          reportData.push({
-            'ID Checklist': `${loc.id}-${chkItem.idItem}`,
-            'ID Lokasi': loc.id,
-            'ID Item': chkItem.idItem,
-            'Nama Item': master ? master.name : '-',
-            'Jumlah Seharusnya': master ? master.standardQty : '-',
-            'Jumlah Aktual': Number(chkItem.jumlahAktual),
-            'Kondisi Item': chkItem.kondisi,
-            'Terdapat Dokumentasi': chkItem.dokumentasi && chkItem.dokumentasi.startsWith('http') ? 'Ya' : 'Tidak',
-            'Catatan': chkItem.catatan
-          });
-        });
-      }
-    });
+  const fetchImageAsBase64 = async (url) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      console.error('Failed to fetch image:', err);
+      return null;
+    }
+  };
 
-    if (reportData.length === 0) {
+  const handleExportReport = async () => {
+    const reportData = [];
+    
+    // Preparations
+    setIsLoaded(false); // Show loading indicator
+    
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Checklist Laporan');
+
+    // Headers
+    worksheet.columns = [
+      { header: 'ID Checklist', key: 'idChecklist', width: 20 },
+      { header: 'ID Lokasi', key: 'idLokasi', width: 15 },
+      { header: 'ID Item', key: 'idItem', width: 15 },
+      { header: 'Nama Item', key: 'namaItem', width: 30 },
+      { header: 'Jumlah Seharusnya', key: 'qtyStd', width: 15 },
+      { header: 'Jumlah Aktual', key: 'qtyAktual', width: 15 },
+      { header: 'Kondisi Item', key: 'kondisi', width: 15 },
+      { header: 'Catatan', key: 'catatan', width: 30 },
+      { header: 'Foto Dokumentasi', key: 'foto', width: 30 }
+    ];
+
+    // Styling Headers
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+    let currentRowNumber = 2;
+
+    for (const loc of locations) {
+      if (loc.isCompleted && checklists[loc.id]) {
+        for (const chkItem of checklists[loc.id]) {
+          const master = masterItems.find(m => m.id === chkItem.idItem);
+          const rowData = {
+            idChecklist: `${loc.id}-${chkItem.idItem}`,
+            idLokasi: loc.id,
+            idItem: chkItem.idItem,
+            namaItem: master ? master.name : '-',
+            qtyStd: master ? master.standardQty : '-',
+            qtyAktual: Number(chkItem.jumlahAktual),
+            kondisi: chkItem.kondisi,
+            catatan: chkItem.catatan || ''
+          };
+
+          const row = worksheet.addRow(rowData);
+          row.height = 100; // Large row for image
+          row.alignment = { vertical: 'middle' };
+
+          // Handle Image
+          if (chkItem.dokumentasi && chkItem.dokumentasi.startsWith('http')) {
+            const base64 = await fetchImageAsBase64(chkItem.dokumentasi);
+            if (base64) {
+              const imageId = workbook.addImage({
+                base64: base64,
+                extension: 'png',
+              });
+              worksheet.addImage(imageId, {
+                tl: { col: 8, row: currentRowNumber - 1 },
+                ext: { width: 120, height: 120 }
+              });
+            }
+          }
+          
+          currentRowNumber++;
+        }
+      }
+    }
+
+    if (currentRowNumber === 2) {
+      setIsLoaded(true);
       alert("Belum ada data checklist yang diisi. Isi minimal satu lokasi untuk diekspor!");
       return;
     }
 
-    const ws = XLSX.utils.json_to_sheet(reportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Checklist Laporan");
-
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(blob, 'Laporan_Checklist_Akomodasi_Online.xlsx');
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, 'Laporan_Checklist_SigmaCMO_KrakatauSteel.xlsx');
+    setIsLoaded(true);
   };
 
   return (

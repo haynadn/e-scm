@@ -1,14 +1,14 @@
 :root {
-  --primary: #4F46E5;
-  --primary-hover: #4338CA;
-  --secondary: #10B981;
+  --primary: #003B73;
+  --primary-hover: #002A52;
+  --secondary: #00A3DA;
   --danger: #EF4444;
   --danger-hover: #DC2626;
-  --background: #F3F4F6;
+  --background: #F0F4F8;
   --surface: #FFFFFF;
   --text-main: #1F2937;
   --text-muted: #6B7280;
-  --border: #E5E7EB;
+  --border: #D1D5DB;
   --radius: 12px;
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -42,8 +42,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .header {
   margin-bottom: 2rem;
-  background: linear-gradient(135deg, var(--primary), #818CF8);
-  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  padding: 2.5rem 2rem;
   border-radius: var(--radius);
   color: white;
   box-shadow: var(--shadow-lg);
