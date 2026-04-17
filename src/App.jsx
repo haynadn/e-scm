@@ -46,20 +46,18 @@ function App() {
     }
   };
 
-  const fetchImageAsBase64 = async (url) => {
+  const fetchImageAsBuffer = async (url) => {
     try {
+      console.log(`Fetching image: ${url}`);
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const blob = await response.blob();
-      const mimeType = blob.type; // e.g. "image/jpeg"
-      const ext = mimeType.split('/')[1] || 'png';
+      const arrayBuffer = await response.arrayBuffer();
+      const mimeType = response.headers.get('Content-Type') || 'image/jpeg';
+      let ext = mimeType.split('/')[1] || 'jpeg';
+      if (ext === 'jpg') ext = 'jpeg';
       
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve({ base64: reader.result, ext });
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+      console.log(`Image fetched successfully. Type: ${ext}, Size: ${arrayBuffer.byteLength} bytes`);
+      return { buffer: new Uint8Array(arrayBuffer), ext };
     } catch (err) {
       console.error('Failed to fetch image:', err);
       return null;
@@ -117,15 +115,16 @@ function App() {
             // Handle Image
             if (chkItem.dokumentasi && chkItem.dokumentasi.startsWith('http')) {
               try {
-                const imgData = await fetchImageAsBase64(chkItem.dokumentasi);
-                if (imgData && imgData.base64) {
+                const imgData = await fetchImageAsBuffer(chkItem.dokumentasi);
+                if (imgData && imgData.buffer) {
                   const imageId = workbook.addImage({
-                    base64: imgData.base64.split(',')[1],
-                    extension: imgData.ext === 'jpg' ? 'jpeg' : imgData.ext,
+                    buffer: imgData.buffer,
+                    extension: imgData.ext,
                   });
                   worksheet.addImage(imageId, {
-                    tl: { col: 8, row: currentRowNumber - 1 },
-                    ext: { width: 120, height: 120 }
+                    tl: { col: 8, row: row.number - 1 },
+                    ext: { width: 120, height: 120 },
+                    editAs: 'oneCell'
                   });
                 }
               } catch (imgErr) {
