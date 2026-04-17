@@ -183,7 +183,7 @@ initDB().then(() => {
             const buffer = Buffer.from(matches[2], 'base64');
             const filename = `LOC_${locationId}_ITEM_${item.idItem}_${Date.now()}.${ext}`;
             fs.writeFileSync(path.join(uploadsDir, filename), buffer);
-            finalDokumentasi = `http://${req.get('host')}/uploads/${filename}`;
+            finalDokumentasi = `//${req.get('host')}/uploads/${filename}`;
           }
         }
 

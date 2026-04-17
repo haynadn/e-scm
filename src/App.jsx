@@ -48,8 +48,14 @@ function App() {
 
   const fetchImageAsBuffer = async (url) => {
     try {
-      console.log(`Fetching image: ${url}`);
-      const response = await fetch(url);
+      // Protocol Upgrade: if page is HTTPS, force HTTPS for the fetch URL
+      let fetchUrl = url;
+      if (window.location.protocol === 'https:' && url.startsWith('http:')) {
+        fetchUrl = url.replace('http:', 'https:');
+      }
+      
+      console.log(`Fetching image: ${fetchUrl}`);
+      const response = await fetch(fetchUrl);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const arrayBuffer = await response.arrayBuffer();
       const mimeType = response.headers.get('Content-Type') || 'image/jpeg';
