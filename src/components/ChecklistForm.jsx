@@ -11,15 +11,9 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
     const checkResetStatus = async () => {
       const status = await onFetchResetStatus(location.id);
       setActiveRequest(status);
-      
-      // If Admin has approved the reset, but our local data hasn't refreshed yet
-      if (status && status.status === 'approved' && savedData && savedData.length > 0) {
-        console.log("Detecting approved reset, refreshing data...");
-        onRefreshData();
-      }
     };
     if (location.id) checkResetStatus();
-  }, [location.id, savedData, onFetchResetStatus, onRefreshData]);
+  }, [location.id, onFetchResetStatus]);
 
   useEffect(() => {
     const initialData = {};
@@ -130,28 +124,37 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
         </div>
 
         {/* Reset Request Status Notification Banner */}
-        {activeRequest && activeRequest.status !== 'approved' && (
+        {activeRequest && (activeRequest.status === 'pending' || activeRequest.status === 'rejected' || (activeRequest.status === 'approved' && savedData && savedData.length > 0)) && (
           <div className={`mt-3 p-3 flex-between`} style={{ 
             borderRadius: '8px', 
-            backgroundColor: activeRequest.status === 'pending' ? '#FFFBEB' : '#FEF2F2',
-            border: `1px solid ${activeRequest.status === 'pending' ? '#FEF3C7' : '#FEE2E2'}`,
-            color: activeRequest.status === 'pending' ? '#92400E' : '#991B1B'
+            backgroundColor: activeRequest.status === 'pending' ? '#FFFBEB' : activeRequest.status === 'approved' ? '#F0FDF4' : '#FEF2F2',
+            border: `1px solid ${activeRequest.status === 'pending' ? '#FEF3C7' : activeRequest.status === 'approved' ? '#BBF7D0' : '#FEE2E2'}`,
+            color: activeRequest.status === 'pending' ? '#92400E' : activeRequest.status === 'approved' ? '#166534' : '#991B1B'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <AlertCircle size={20} />
               <div style={{ fontSize: '0.9rem' }}>
                 {activeRequest.status === 'pending' ? (
                   <><strong>Permintaan Reset Sedang Diproses:</strong> Menunggu persetujuan dari Administrator.</>
+                ) : activeRequest.status === 'approved' ? (
+                  <><strong>Data Telah Dihapus:</strong> Administrator telah menyetujui reset data. Silakan klik sinkronkan untuk membersihkan form.</>
                 ) : (
                   <><strong>Permintaan Reset Ditolak:</strong> Admin menolak permintaan pembersihan data untuk lokasi ini.</>
                 )}
               </div>
             </div>
-            {activeRequest.status === 'rejected' && (
-              <button className="btn-icon" onClick={() => setActiveRequest(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}>
-                <X size={16} />
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {activeRequest.status === 'approved' && (
+                <button className="btn btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', borderColor: '#166534', color: '#166534' }} onClick={onRefreshData}>
+                   Sinkronkan Data
+                </button>
+              )}
+              {activeRequest.status === 'rejected' && (
+                <button className="btn-icon" onClick={() => setActiveRequest(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}>
+                  <X size={16} />
+                </button>
+              )}
+            </div>
           </div>
         )}
 
