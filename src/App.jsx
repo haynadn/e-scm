@@ -120,7 +120,7 @@ function App() {
                 const imgData = await fetchImageAsBase64(chkItem.dokumentasi);
                 if (imgData && imgData.base64) {
                   const imageId = workbook.addImage({
-                    base64: imgData.base64,
+                    base64: imgData.base64.split(',')[1],
                     extension: imgData.ext === 'jpg' ? 'jpeg' : imgData.ext,
                   });
                   worksheet.addImage(imageId, {
