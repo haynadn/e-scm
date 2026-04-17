@@ -356,9 +356,19 @@ initDB().then(() => {
     }
   });
 
-  app.get('/api/logs', authenticateToken, authorizeAdministrator, async (req, res) => {
+  app.get('/api/logs', authenticateToken, authorizeEditor, async (req, res) => {
     try {
-      const result = await db.query(`SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 200`);
+      let query = `SELECT * FROM activity_logs`;
+      let params = [];
+      
+      if (req.user.role !== 'administrator') {
+        query += ` WHERE username = $1`;
+        params.push(req.user.username);
+      }
+      
+      query += ` ORDER BY created_at DESC LIMIT 200`;
+      
+      const result = await db.query(query, params);
       res.json(result.rows);
     } catch (err) {
       res.status(500).json({ error: err.message });

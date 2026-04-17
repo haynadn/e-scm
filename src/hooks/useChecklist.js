@@ -203,6 +203,27 @@ export function useChecklist() {
       });
     });
 
+    const mismatchedLocations = [];
+    safeLocations.forEach(loc => {
+      const locChecklist = data.checklists[loc.id] || [];
+      let mismatchCount = 0;
+      locChecklist.forEach(chk => {
+        if (chk.jumlahAktual !== null && chk.jumlahAktual !== '' && chk.jumlahAktual !== undefined) {
+          const master = safeMasterItems.find(m => m.id === chk.idItem);
+          if (master && parseInt(chk.jumlahAktual) !== parseInt(master.standardQty)) {
+            mismatchCount++;
+          }
+        }
+      });
+      if (mismatchCount > 0) {
+        mismatchedLocations.push({ id: loc.id, name: loc.name, mismatchCount });
+      }
+    });
+
+    const topMismatchedLocations = mismatchedLocations
+      .sort((a, b) => b.mismatchCount - a.mismatchCount)
+      .slice(0, 5);
+
     return {
       totalLocations: safeLocations.length,
       completedLocations,
@@ -211,7 +232,8 @@ export function useChecklist() {
       matchingItems,
       nonMatchingItems,
       conditionStats: conditions,
-      itemConditionBreakdown
+      itemConditionBreakdown,
+      topMismatchedLocations
     };
   };
 
