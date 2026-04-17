@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-import { CheckCircle, AlertCircle, MapPin, Package, Download, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, MapPin, Package, Download, X, Search, Filter } from 'lucide-react';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 export default function Dashboard({ stats, onNavigate, onExport, locations = [], checklists = {}, masterItems = [], role }) {
   const [activeModal, setActiveModal] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const pieData = {
     labels: ['Sesuai', 'Tidak Sesuai'],
     datasets: [
@@ -136,7 +138,38 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
       
       {/* Item Detail Breakdown Section */}
       <div className="card mt-4">
-        <h3 className="mb-4">Item Condition Breakdown Detail</h3>
+        <div className="flex-between mb-4 flex-wrap" style={{ gap: '1rem' }}>
+          <h3>Item Condition Breakdown Detail</h3>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', width: '100%', maxWidth: '600px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Cari item..." 
+                style={{ paddingLeft: '2.5rem', fontSize: '0.875rem' }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div style={{ position: 'relative', width: '180px' }}>
+              <Filter size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+              <select 
+                className="form-control" 
+                style={{ paddingLeft: '2.5rem', fontSize: '0.875rem' }}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">Semua Barang</option>
+                <option value="issues">Bermasalah Saja</option>
+                <option value="bagus">Bagus Saja</option>
+                <option value="rusak">Rusak (Rgn/Brt)</option>
+                <option value="hilang">Hilang Saja</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
@@ -150,31 +183,54 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
               </tr>
             </thead>
             <tbody>
-              {masterItems.map(item => {
-                const breakdown = stats.itemConditionBreakdown?.[item.id] || { 'Bagus': 0, 'Rusak Ringan': 0, 'Rusak Berat': 0, 'Hilang': 0 };
-                const total = breakdown['Bagus'] + breakdown['Rusak Ringan'] + breakdown['Rusak Berat'] + breakdown['Hilang'];
-                
-                return (
-                  <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '1rem' }}>
-                      <div style={{ fontWeight: 600 }}>{item.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {item.id}</div>
-                    </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#059669' }}>{breakdown['Bagus'] || '-'}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#D97706' }}>{breakdown['Rusak Ringan'] || '-'}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#DC2626' }}>{breakdown['Rusak Berat'] || '-'}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#4B5563' }}>{breakdown['Hilang'] || '-'}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>{total || '-'}</td>
-                  </tr>
-                );
-              })}
-              {masterItems.length === 0 && (
-                <tr>
-                   <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                     No master items found.
-                   </td>
-                </tr>
-              )}
+              {(() => {
+                const filtered = masterItems.filter(item => {
+                  const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                    item.id.toLowerCase().includes(searchTerm.toLowerCase());
+                  if (!matchSearch) return false;
+
+                  const b = stats.itemConditionBreakdown?.[item.id] || { 'Bagus': 0, 'Rusak Ringan': 0, 'Rusak Berat': 0, 'Hilang': 0 };
+                  const hasIssues = (b['Rusak Ringan'] || 0) + (b['Rusak Berat'] || 0) + (b['Hilang'] || 0) > 0;
+                  const hasDamage = (b['Rusak Ringan'] || 0) + (b['Rusak Berat'] || 0) > 0;
+                  const hasMissing = (b['Hilang'] || 0) > 0;
+                  const hasBagus = (b['Bagus'] || 0) > 0;
+
+                  if (statusFilter === 'issues') return hasIssues;
+                  if (statusFilter === 'bagus') return hasBagus && !hasIssues;
+                  if (statusFilter === 'rusak') return hasDamage;
+                  if (statusFilter === 'hilang') return hasMissing;
+                  return true;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <tr>
+                      <td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        Tidak ada item yang sesuai dengan filter.
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return filtered.map(item => {
+                  const breakdown = stats.itemConditionBreakdown?.[item.id] || { 'Bagus': 0, 'Rusak Ringan': 0, 'Rusak Berat': 0, 'Hilang': 0 };
+                  const total = (breakdown['Bagus'] || 0) + (breakdown['Rusak Ringan'] || 0) + (breakdown['Rusak Berat'] || 0) + (breakdown['Hilang'] || 0);
+                  
+                  return (
+                    <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem' }}>
+                        <div style={{ fontWeight: 600 }}>{item.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {item.id}</div>
+                      </td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#059669' }}>{breakdown['Bagus'] || '-'}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#D97706' }}>{breakdown['Rusak Ringan'] || '-'}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#DC2626' }}>{breakdown['Rusak Berat'] || '-'}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 500, color: '#4B5563' }}>{breakdown['Hilang'] || '-'}</td>
+                      <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 700 }}>{total || '-'}</td>
+                    </tr>
+                  );
+                });
+              })()}
             </tbody>
           </table>
         </div>
