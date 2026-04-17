@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Camera, Upload, Trash2 } from 'lucide-react';
 
-export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack }) {
+export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role }) {
+  const isReadOnly = role === 'viewer';
   const [formData, setFormData] = useState({});
   const [address, setAddress] = useState(location.address || '');
 
@@ -84,10 +85,13 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             </button>
             <h2 style={{ display: 'inline-block', marginLeft: '1rem' }}>{location.name} Form</h2>
             <p className="text-muted ml-2" style={{ display: 'inline-block' }}>({location.id})</p>
+            {isReadOnly && <span style={{ marginLeft: '1rem', padding: '0.25rem 0.75rem', backgroundColor: '#F3F4F6', color: '#4B5563', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>READ ONLY MODE</span>}
           </div>
-          <button className="btn btn-primary" onClick={handleSubmit}>
-            <Save size={18} /> Save Data
-          </button>
+          {!isReadOnly && (
+            <button className="btn btn-primary" onClick={handleSubmit}>
+              <Save size={18} /> Save Data
+            </button>
+          )}
         </div>
         <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
           <label className="form-label" style={{ fontWeight: 600 }}>Alamat / Deskripsi Tambahan :</label>
@@ -97,6 +101,7 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             style={{ minHeight: '60px' }}
+            disabled={isReadOnly}
           />
         </div>
       </div>
@@ -123,6 +128,7 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                     min="0"
                     value={currentItemState.jumlahAktual || ''}
                     onChange={(e) => handleInputChange(item.id, 'jumlahAktual', e.target.value)}
+                    disabled={isReadOnly}
                   />
                 </div>
                 
@@ -132,6 +138,7 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                     className="form-control"
                     value={currentItemState.kondisi || 'Bagus'}
                     onChange={(e) => handleInputChange(item.id, 'kondisi', e.target.value)}
+                    disabled={isReadOnly}
                   >
                     <option value="Bagus">Bagus</option>
                     <option value="Rusak Ringan">Rusak Ringan</option>
@@ -156,9 +163,11 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                     </div>
                     <div className="flex-between" style={{ padding: '0.75rem' }}>
                       <span style={{ color: '#166534', fontWeight: 500 }}>Image Ready</span>
-                      <button type="button" className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} onClick={() => handleInputChange(item.id, 'dokumentasi', '')}>
-                        <Trash2 size={16} className="mr-2"/> Remove
-                      </button>
+                      {!isReadOnly && (
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }} onClick={() => handleInputChange(item.id, 'dokumentasi', '')}>
+                          <Trash2 size={16} className="mr-2"/> Remove
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -184,17 +193,20 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                   placeholder="Tambahkan catatan khusus bila perlu..."
                   value={currentItemState.catatan || ''}
                   onChange={(e) => handleInputChange(item.id, 'catatan', e.target.value)}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
           );
         })}
         
-        <div className="card mt-4 text-center">
-          <button type="submit" className="btn btn-primary w-full" style={{ padding: '1rem', fontSize: '1.1rem' }}>
-            <Save size={20} className="mr-2" /> Submit Checklist
-          </button>
-        </div>
+        {!isReadOnly && (
+          <div className="card mt-4 text-center">
+            <button type="submit" className="btn btn-primary w-full" style={{ padding: '1rem', fontSize: '1.1rem' }}>
+              <Save size={20} className="mr-2" /> Submit Checklist
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

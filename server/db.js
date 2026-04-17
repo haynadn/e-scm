@@ -71,12 +71,20 @@ export const initDB = async () => {
     `);
 
     // Default Admin User
-    const defaultHash = bcrypt.hashSync('password123', 10);
+    const adminHash = bcrypt.hashSync('password123', 10);
     await client.query(`
       INSERT INTO users (username, password, role)
       VALUES ('admin', $1, 'admin')
       ON CONFLICT (username) DO NOTHING
-    `, [defaultHash]);
+    `, [adminHash]);
+
+    // Default Viewer User
+    const viewerHash = bcrypt.hashSync('password123', 10);
+    await client.query(`
+      INSERT INTO users (username, password, role)
+      VALUES ('user', $1, 'viewer')
+      ON CONFLICT (username) DO NOTHING
+    `, [viewerHash]);
 
     console.log("PostgreSQL Database initialized.");
   } catch (err) {

@@ -5,7 +5,7 @@ import { CheckCircle, AlertCircle, MapPin, Package, Download, X } from 'lucide-r
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
-export default function Dashboard({ stats, onNavigate, onExport, locations = [], checklists = {}, masterItems = [] }) {
+export default function Dashboard({ stats, onNavigate, onExport, locations = [], checklists = {}, masterItems = [], role }) {
   const [activeModal, setActiveModal] = useState(null);
   const pieData = {
     labels: ['Sesuai', 'Tidak Sesuai'],
@@ -26,6 +26,21 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
         label: 'Locations',
         data: [stats.completedLocations, stats.remainingLocations],
         backgroundColor: ['#4F46E5', '#E5E7EB'],
+      },
+    ],
+  };
+  const conditionData = {
+    labels: ['Bagus', 'Rusak Ringan', 'Rusak Berat', 'Hilang'],
+    datasets: [
+      {
+        label: 'Kondisi Barang',
+        data: [
+          stats.conditionStats?.bagus || 0,
+          stats.conditionStats?.rusakRingan || 0,
+          stats.conditionStats?.rusakBerat || 0,
+          stats.conditionStats?.hilang || 0
+        ],
+        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280'],
       },
     ],
   };
@@ -94,13 +109,31 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
             />
           </div>
         </div>
+
+        <div className="card">
+          <h3 className="mb-4">Kondisi Barang (Actual)</h3>
+          <div style={{ height: '300px' }}>
+            <Bar 
+              data={conditionData} 
+              options={{ 
+                maintainAspectRatio: false, 
+                responsive: true,
+                plugins: {
+                  legend: { display: false }
+                }
+              }}
+            />
+          </div>
+        </div>
       </div>
       
-      <div className="text-center mt-4">
-        <button className="btn btn-primary" onClick={() => onNavigate('locations')}>
-           Start Filling Checklist <MapPin className="ml-2" size={18} />
-        </button>
-      </div>
+      {role !== 'viewer' && (
+        <div className="text-center mt-4">
+          <button className="btn btn-primary" onClick={() => onNavigate('locations')}>
+             Start Filling Checklist <MapPin className="ml-2" size={18} />
+          </button>
+        </div>
+      )}
 
       {activeModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>

@@ -111,6 +111,7 @@ function App() {
             locations={locations}
             checklists={checklists}
             masterItems={masterItems}
+            role={session.role}
           />
         )}
 
@@ -132,6 +133,7 @@ function App() {
             onSelectLocation={(loc) => navigateTo('checklist', loc)}
             onBack={() => navigateTo('dashboard')}
             onUpdateLocationName={updateLocationName}
+            role={session.role}
           />
         )}
         
@@ -142,6 +144,7 @@ function App() {
             savedData={checklists[selectedLocation.id]}
             onSave={saveChecklist}
             onBack={() => navigateTo('locations')}
+            role={session.role}
           />
         )}
       </main>

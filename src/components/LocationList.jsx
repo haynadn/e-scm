@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Map, ChevronRight, CheckCircle, Search, Edit2, Check, X } from 'lucide-react';
 
-export default function LocationList({ locations, checklists = {}, masterItems = [], onSelectLocation, onBack, onUpdateLocationName }) {
+export default function LocationList({ locations, checklists = {}, masterItems = [], onSelectLocation, onBack, onUpdateLocationName, role }) {
   const [filter, setFilter] = useState('all'); // 'all', 'completed', 'partial', 'kosong'
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -151,14 +151,16 @@ export default function LocationList({ locations, checklists = {}, masterItems =
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <h3 style={{ margin: 0, paddingRight: '0.5rem' }}>{loc.name}</h3>
-                  <button 
-                    className="btn-icon" 
-                    style={{ padding: '0.25rem', opacity: 0.5, border: 'none', background: 'transparent', cursor: 'pointer' }} 
-                    onClick={(e) => handleEditClick(e, loc)}
-                    title="Edit Nama Lokasi"
-                  >
-                    <Edit2 size={16} />
-                  </button>
+                  {role === 'admin' && (
+                    <button 
+                      className="btn-icon" 
+                      style={{ padding: '0.25rem', opacity: 0.5, border: 'none', background: 'transparent', cursor: 'pointer' }} 
+                      onClick={(e) => handleEditClick(e, loc)}
+                      title="Edit Nama Lokasi"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -168,7 +170,7 @@ export default function LocationList({ locations, checklists = {}, masterItems =
             
             <div className="flex-between" style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: 'auto' }}>
               <span style={{ fontSize: '0.875rem', fontWeight: 600, color: loc.isCompleted ? 'var(--secondary)' : 'var(--primary)' }}>
-                {loc.isCompleted ? 'View Data' : 'Fill Checklist'}
+                {loc.isCompleted ? 'View Data' : role === 'viewer' ? 'View Details' : 'Fill Checklist'}
               </span>
               {loc.isCompleted ? (
                 <CheckCircle size={18} color="var(--secondary)" />

@@ -48,6 +48,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+const authorizeAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Akses ditolak. Hanya Admin yang diperbolehkan.' });
+  }
+};
+
 // Start Server & DB
 initDB().then(() => {
   app.post('/api/login', async (req, res) => {
@@ -109,7 +117,7 @@ initDB().then(() => {
     }
   });
 
-  app.post('/api/import', authenticateToken, async (req, res) => {
+  app.post('/api/import', authenticateToken, authorizeAdmin, async (req, res) => {
     const { locations, masterItems } = req.body;
     const client = await db.connect();
     
@@ -147,6 +155,9 @@ initDB().then(() => {
   });
 
   app.post('/api/locations/:id/checklist', authenticateToken, async (req, res) => {
+    if (req.user.role === 'viewer') {
+      return res.status(403).json({ error: 'Akses ditolak. Anda sedang dalam mode Lihat Saja.' });
+    }
     const locationId = req.params.id;
     const itemsData = req.body.items; 
     const isCompleted = req.body.isCompleted || false;
@@ -207,7 +218,7 @@ initDB().then(() => {
     }
   });
 
-  app.put('/api/locations/:id', authenticateToken, async (req, res) => {
+  app.put('/api/locations/:id', authenticateToken, authorizeAdmin, async (req, res) => {
     const locationId = req.params.id;
     const { name } = req.body;
     try {
@@ -240,7 +251,7 @@ initDB().then(() => {
     }
   });
 
-  app.delete('/api/clear', authenticateToken, async (req, res) => {
+  app.delete('/api/clear', authenticateToken, authorizeAdmin, async (req, res) => {
     const client = await db.connect();
     try {
       await client.query("BEGIN");

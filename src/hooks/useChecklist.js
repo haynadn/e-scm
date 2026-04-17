@@ -160,6 +160,12 @@ export function useChecklist() {
     let totalItemsChecked = 0;
     let matchingItems = 0;
     let nonMatchingItems = 0;
+    const conditions = {
+      bagus: 0,
+      rusakRingan: 0,
+      rusakBerat: 0,
+      hilang: 0
+    };
 
     const safeLocations = data.locations || [];
     const safeMasterItems = data.masterItems || [];
@@ -182,6 +188,11 @@ export function useChecklist() {
           } else {
             nonMatchingItems++;
           }
+
+          if (chk.kondisi === 'Bagus') conditions.bagus++;
+          else if (chk.kondisi === 'Rusak Ringan') conditions.rusakRingan++;
+          else if (chk.kondisi === 'Rusak Berat') conditions.rusakBerat++;
+          else if (chk.kondisi === 'Hilang') conditions.hilang++;
         }
       });
     });
@@ -192,7 +203,8 @@ export function useChecklist() {
       remainingLocations: safeLocations.length - completedLocations,
       totalItemsChecked,
       matchingItems,
-      nonMatchingItems
+      nonMatchingItems,
+      conditionStats: conditions
     };
   };
 
