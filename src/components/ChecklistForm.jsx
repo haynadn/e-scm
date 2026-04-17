@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Camera, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Camera, Upload, Trash2, AlertCircle, X } from 'lucide-react';
 
 export default function ChecklistForm({ location, masterItems, savedData, onSave, onBack, role, onRequestReset, onFetchResetStatus }) {
   const isReadOnly = role === 'viewer';
