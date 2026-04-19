@@ -45,7 +45,7 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
   })
   .filter(item => item.issueCount > 0)
   .sort((a, b) => b.issueCount - a.issueCount)
-  .slice(0, 5);
+  .slice(0, 15);
 
   // Chart Data
   const pieData = {
@@ -163,7 +163,7 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
         <div className="card shadow-sm">
           <h3 className="mb-4 flex items-center"><AlertCircle size={18} className="mr-2" color="var(--danger)" /> High Discrepancy Areas</h3>
           {stats.topMismatchedLocations?.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '320px', overflowY: 'auto', paddingRight: '0.5rem' }}>
               {stats.topMismatchedLocations.map(loc => (
                 <div key={loc.id} className="flex-between" style={{ padding: '0.75rem', backgroundColor: '#FEF2F2', borderRadius: '8px', border: '1px solid #FEE2E2' }}>
                   <div>
@@ -186,7 +186,7 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
         <div className="card shadow-sm">
           <h3 className="mb-4 flex items-center"><TrendingUp size={18} className="mr-2" color="var(--primary)" /> Top Attention Items</h3>
           {topProblems.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '320px', overflowY: 'auto', paddingRight: '0.5rem' }}>
               {topProblems.map(item => (
                 <div key={item.id} className="flex-between" style={{ padding: '0.75rem', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid var(--border)' }}>
                   <div>
@@ -210,7 +210,7 @@ export default function Dashboard({ stats, onNavigate, onExport, locations = [],
             <Clock size={18} className="mr-2" color="#6B7280" /> 
             {role === 'administrator' ? 'System Activity Feed' : 'My Recent Activity'}
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '320px', overflowY: 'auto', paddingRight: '0.5rem' }}>
             {recentLogs.length > 0 ? (
               <>
                 {recentLogs.map(log => (

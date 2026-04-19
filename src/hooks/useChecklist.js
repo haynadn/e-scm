@@ -222,7 +222,7 @@ export function useChecklist() {
 
     const topMismatchedLocations = mismatchedLocations
       .sort((a, b) => b.mismatchCount - a.mismatchCount)
-      .slice(0, 5);
+      .slice(0, 15);
 
     return {
       totalLocations: safeLocations.length,
