@@ -218,7 +218,7 @@ export default function ChecklistForm({ location, masterItems, savedData, onSave
                 {currentItemState.dokumentasi ? (
                   <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', overflow: 'hidden' }}>
                     <div style={{ position: 'relative', height: '150px', background: '#ddd' }}>
-                       {currentItemState.dokumentasi.startsWith('data:image') || currentItemState.dokumentasi.startsWith('http') ? (
+                       {currentItemState.dokumentasi.startsWith('data:image') || currentItemState.dokumentasi.startsWith('http') || currentItemState.dokumentasi.startsWith('//') ? (
                           <img src={currentItemState.dokumentasi} alt="Dokumentasi" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                        ) : (
                           <div style={{ padding: '1rem', color: '#166534', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>

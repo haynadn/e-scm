@@ -123,7 +123,7 @@ function App() {
             row.alignment = { vertical: 'middle' };
 
             // Handle Image
-            if (chkItem.dokumentasi && chkItem.dokumentasi.startsWith('http')) {
+            if (chkItem.dokumentasi && (chkItem.dokumentasi.startsWith('http') || chkItem.dokumentasi.startsWith('//'))) {
               try {
                 const imgData = await fetchImageAsBuffer(chkItem.dokumentasi);
                 if (imgData && imgData.buffer) {
